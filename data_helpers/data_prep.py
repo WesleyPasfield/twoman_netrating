@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 
-def train_valid_test_splitter(df, train_prop):
+def train_valid_test_splitter(df, train_prop, seed):
 
-	np.random.seed(999)
+	np.random.seed(seed)
 
 	dfnew = df
 
