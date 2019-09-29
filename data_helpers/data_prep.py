@@ -26,9 +26,9 @@ def train_valid_test_splitter(df, train_prop, seed):
 	valid_players = valid[['player_left', 'player_right', 'team_year']]
 	test_players = test[['player_left', 'player_right', 'team_year']]
 
-	train.drop(['player_left', 'player_right'], inplace = True, axis = 1)
-	valid.drop(['player_left', 'player_right'], inplace = True, axis = 1)
-	test.drop(['player_left', 'player_right'], inplace = True, axis = 1)
+	#train.drop(['player_left', 'player_right'], inplace = True, axis = 1)
+	#valid.drop(['player_left', 'player_right'], inplace = True, axis = 1)
+	#test.drop(['player_left', 'player_right'], inplace = True, axis = 1)
 
 	return train, train_players, valid, valid_players, test, test_players
 
@@ -76,8 +76,10 @@ def min_max(df, base_df, cols):
 
 def xandy(df, variable):
 
+	## Option to drop player information as well. Useful to retain for later embedding eval.
+
 	df = df.reset_index(drop=True)
 	yval = df[variable]
-	df.drop([variable], inplace = True, axis = 1)
+	df.drop([variable, 'player_left', 'player_right', 'year'], inplace = True, axis = 1)
 
 	return df, yval

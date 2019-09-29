@@ -59,6 +59,8 @@ def set_scheduler(optimizer:Optimizer, sch_params:List[Any]):
 		return StepLR(optimizer, step_size=s, gamma=g)
 	if sch == "MultiStepLR":
 		return MultiStepLR(optimizer, milestones=s, gamma=g)
+	if sch == "CosineAnnealing":
+		return CosineAnnealing(optimizer, )
 
 def dl(inputlen:int, outputlen:int, dropout:float):
 	return nn.Sequential(
@@ -173,7 +175,7 @@ class DeepDense(nn.Module):
 					y = y.cuda() if use_cuda else y
 
 					self.optimizer.zero_grad() ## Zeros out gradient. For RNN can skip this for BPTT. Weights are accumlated.
-					y_pred =  net(X) ##
+					y_pred =  net(X) ## Executes forward pass
 					if(self.criterion == F.cross_entropy): ## for classification
 						loss = self.criterion(y_pred, y)
 					else:
@@ -193,7 +195,7 @@ class DeepDense(nn.Module):
 						correct+= float((y_pred_cat == y).sum().item())
 						t.set_postfix(acc=correct/total, loss=avg_loss)
 					else:
-						t.set_postfix(loss=np.sqrt(avg_loss))
+						t.set_postfix(loss=np.sqrt(avg_loss)) ## For printing out progress
 
 			if eval_loader:
 				total, correct, running_loss = 0,0,0
@@ -236,6 +238,21 @@ class DeepDense(nn.Module):
 					# would be more efficient to append Tensors and then cat
 					preds_l.append(net(X).cpu().data.numpy())
 			return np.vstack(preds_l).squeeze(1)
+
+	def get_embeddings(self, col_name:str) -> Dict[str,np.ndarray]:
+
+		## Make this work
+
+		params = list(self.named_parameters())
+		emb_layers = [p for p in params if 'emb_layer' in p[0]]
+		emb_layer  = [layer for layer in emb_layers if col_name in layer[0]][0]
+		embeddings = emb_layer[1].cpu().data.numpy()
+		col_label_encoding = self.embeddings_encoding_dict[col_name]
+		inv_dict = {v:k for k,v in col_label_encoding.items()}
+		embeddings_dict = {}
+		for idx,value in inv_dict.items():
+			embeddings_dict[value] = embeddings[idx]
+		return embeddings_dict
 
 class model_dataloader(Dataset):
 
